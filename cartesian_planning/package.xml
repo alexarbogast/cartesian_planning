@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cartesian_planning</name>
+  <version>0.1.0</version>
+  <description>Tools for planning cartesian trajectories</description>
+  <author email="arbogastaw@gmail.com">Alex Arbogast</author>
+  <maintainer email="arbogastaw@gmail.com">Alex Arbogast</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>cartesian_planner</exec_depend>
+  <exec_depend>cartesian_planning_server</exec_depend>
+  <exec_depend>cartesian_planning_examples</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

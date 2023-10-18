@@ -1,0 +1,32 @@
+<launch>
+  <!-- GDB functionality -->
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value=""/>
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args"/>
+
+  <!-- Load robot_description -->
+  <param name="robot_description" command="xacro '$(find cartesian_planning_examples)/urdf/robot6R.xacro'"/>
+
+  <!-- Load controller and hardware configuration -->
+  <rosparam file="$(find cartesian_planning_examples)/config/example_controllers.yaml" command="load"/> 
+
+  <!-- Load hardware interface -->
+  <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main" 
+        output="screen" launch-prefix="$(arg launch_prefix)"/>
+
+  <!-- Load controller manager -->
+  <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false"
+      args="spawn joint_state_controller position_trajectory_controller"/>
+  
+  <!-- Robot state publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+
+  <!-- Load Cartesian planning server -->
+  <rosparam file="$(find cartesian_planning_examples)/config/cartesian_planning_example.yaml" command="load"/>
+  <node pkg="cartesian_planning_server" name="cartesian_planning_server" type="cartesian_planning_server" output="screen"/>
+  
+  <!-- Load rviz visualization -->
+  <node name="rviz" pkg="rviz" type="rviz" 
+        args="-d $(find cartesian_planning_examples)/config/cartesian_planning_example.rviz"/>
+
+</launch>
