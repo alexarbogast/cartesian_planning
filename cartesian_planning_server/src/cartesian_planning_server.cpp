@@ -121,7 +121,7 @@ private:
 
     res.success = response.success;
     res.trajectory.points = response.joint_trajectory;
-    res.trajectory.header.stamp = ros::Time::now();
+    res.trajectory.header.stamp = ros::Time(0.0);
     res.trajectory.joint_names = joint_names_;
     return response.success;
   }
