@@ -3,7 +3,8 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <sensor_msgs/JointState.h>
 
-#include <cartesian_planning_server/PlanCartesianTrajectory.h>
+#include <cartesian_planning_msgs/ErrorCodes.h>
+#include <cartesian_planning_msgs/PlanCartesianTrajectory.h>
 
 static const std::string NAME = "cartesian_planning_demo";
 
@@ -16,7 +17,7 @@ public:
         "position_trajectory_controller/follow_joint_trajectory", true);
 
     planning_client_ =
-        nh_.serviceClient<cartesian_planning_server::PlanCartesianTrajectory>(
+        nh_.serviceClient<cartesian_planning_msgs::PlanCartesianTrajectory>(
             "cartesian_planning_server/plan_cartesian_trajectory");
 
     ROS_INFO("Waiting for plan_cartesian_trajectory server...");
@@ -30,7 +31,7 @@ public:
 
   void run()
   {
-    cartesian_planning_server::PlanCartesianTrajectory srv;
+    cartesian_planning_msgs::PlanCartesianTrajectory srv;
 
     /* Set start state */
     auto start_state = ros::topic::waitForMessage<sensor_msgs::JointState>(
@@ -61,9 +62,13 @@ public:
     /* Set velocity */
     srv.request.velocity = 0.200;
     planning_client_.call(srv);
-    if (!srv.response.success)
+
+    if (srv.response.error_code.val !=
+        cartesian_planning_msgs::ErrorCodes::SUCCESS)
     {
-      ROS_ERROR("Failed to plan cartesian trajectory");
+      ROS_ERROR_STREAM("Failed to plan Cartesian trajectory. "
+                       << "Planning service returned with ERROR_CODE: "
+                       << srv.response.error_code.val);
       return;
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>cartesian_planner</name>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>The cartesian_planner package</description>
   <author email="arbogastaw@gmail.com">Alex Arbogast</author>
   <maintainer email="arbogastaw@gmail.com">Alex Arbogast</maintainer>
@@ -13,5 +13,6 @@
   <depend>kdl_parser</depend>
   <depend>eigen_conversions</depend>
   <depend>trajectory_msgs</depend>
+  <depend>cartesian_planning_msgs</depend>
 
 </package>

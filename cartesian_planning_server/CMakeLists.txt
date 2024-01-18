@@ -10,23 +10,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  message_generation
-  sensor_msgs
-  geometry_msgs
-  trajectory_msgs
   cartesian_planner
+  cartesian_planning_msgs
 )
-
-add_service_files(DIRECTORY srv FILES PlanCartesianTrajectory.srv)
-generate_messages(DEPENDENCIES sensor_msgs geometry_msgs trajectory_msgs)
 
 catkin_package(CATKIN_DEPENDS
   roscpp
-  message_runtime
-  sensor_msgs
-  geometry_msgs
-  trajectory_msgs
   cartesian_planner
+  cartesian_planning_msgs
 )
 
 include_directories(${catkin_INCLUDE_DIRS})

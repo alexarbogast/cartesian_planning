@@ -7,7 +7,7 @@
 #include <kdl_parser/kdl_parser.hpp>
 
 #include <cartesian_planner/cartesian_planner.h>
-#include <cartesian_planning_server/PlanCartesianTrajectory.h>
+#include <cartesian_planning_msgs/PlanCartesianTrajectory.h>
 
 static const std::string NAME = "cartesian_planning_server";
 
@@ -96,8 +96,9 @@ public:
   }
 
 private:
-  bool planCartesianTrajectoryService(PlanCartesianTrajectory::Request& req,
-                                      PlanCartesianTrajectory::Response& res)
+  bool planCartesianTrajectoryService(
+      cartesian_planning_msgs::PlanCartesianTrajectory::Request& req,
+      cartesian_planning_msgs::PlanCartesianTrajectory::Response& res)
   {
     cartesian_planner::CartesianPlanningRequest request;
     request.error_threshold = error_threshold_;
@@ -119,11 +120,18 @@ private:
     cartesian_planner::CartesianPlanningResponse response;
     planner_->planCartesianTrajectory(request, response);
 
-    res.success = response.success;
+    if (!response.error_code)
+    {
+      ROS_ERROR_STREAM("Failed to plan Cartesian trajectory. "
+                       << "Planner returned with error code: "
+                       << response.error_code);
+    }
+
+    res.error_code = response.error_code;
     res.trajectory.points = response.joint_trajectory;
     res.trajectory.header.stamp = ros::Time(0.0);
     res.trajectory.joint_names = joint_names_;
-    return response.success;
+    return true;
   }
 
   ros::NodeHandle nh_;

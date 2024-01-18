@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   eigen_conversions
   trajectory_msgs
+  cartesian_planning_msgs
 )
 
 find_package(Eigen3 REQUIRED)
@@ -27,6 +28,7 @@ catkin_package(
     kdl_parser
     eigen_conversions
     trajectory_msgs
+    cartesian_planning_msgs
 )
 
 include_directories(
@@ -35,7 +37,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/cartesian_planner.cpp)
+add_library(${PROJECT_NAME} src/error_codes.cpp src/cartesian_planner.cpp)
 target_link_libraries(${PROJECT_NAME} 
   ${catkin_LIBRARIES}
   Eigen3::Eigen

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import rospy
 import actionlib
 
@@ -5,8 +7,8 @@ from control_msgs.msg import *
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 
-from cartesian_planning_server.srv import *
-from copy import deepcopy
+from cartesian_planning_msgs.msg import ErrorCodes
+from cartesian_planning_msgs.srv import *
 
 NAME = "cartesian_planning_demo"
 
@@ -64,17 +66,26 @@ class CartesianPlanningDemo(object):
             req.path.append(deepcopy(pose))
 
         # set velocity
-        req.velocity = 4.00
-        resp = self._planning_client(req)
-        if not resp.success:
-            rospy.logerr("Failed to plan cartesian trajectory")
+        req.velocity = 0.200
+        resp = PlanCartesianTrajectoryResponse()
+        try:
+            resp = self._planning_client(req)
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Cartesian planning service failed with exception: {e}")
+            return
+
+        if not resp.error_code.val == ErrorCodes.SUCCESS:
+            rospy.logerr(
+                "Failed to plan Cartesian trajectory. "
+                + "Planning service returned with ERROR_CODE: "
+                + str(resp.error_code.val)
+            )
             return
 
         # send trajectory to action server
         goal = control_msgs.msg.FollowJointTrajectoryGoal()
         goal.trajectory = resp.trajectory
         self._action_client.send_goal(goal)
-
 
 if __name__ == "__main__":
     rospy.init_node(NAME)

@@ -6,6 +6,7 @@
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 
 #include <cartesian_planner/utility.h>
+#include <cartesian_planner/error_codes.h>
 
 namespace cartesian_planner
 {
@@ -23,6 +24,8 @@ struct CartesianPlanningRequest
 struct CartesianPlanningResponse
 {
   bool success = false;
+  ErrorCode error_code;
+
   std::vector<trajectory_msgs::JointTrajectoryPoint> joint_trajectory;
 };
 

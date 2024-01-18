@@ -1,7 +1,8 @@
 geometry_msgs/Pose[] path                   # the cartesian path to follow
 sensor_msgs/JointState start_state          # the initial joint state matching the first point in path 
 float64 velocity                            # the velocity at which the path is traversed
+
 ---
-bool success                                # indicate successful planning
-string message                              # informational, e.g. for error messages
+
 trajectory_msgs/JointTrajectory trajectory
+ErrorCodes error_code

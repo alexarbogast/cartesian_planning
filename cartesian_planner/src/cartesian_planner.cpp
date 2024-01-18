@@ -18,6 +18,7 @@ bool CartesianPlanner::planCartesianTrajectory(
   if (request.start_state.rows() != n_joints_)
   {
     response.success = false;
+    response.error_code = ErrorCode::INVALID_ROBOT_STATE;
     return false;
   }
 
@@ -95,6 +96,7 @@ bool CartesianPlanner::planCartesianTrajectory(
       if (j == request.max_step_iterations)
       {
         response.success = false;
+        response.error_code = ErrorCode::MAX_ITERATIONS;
         return false;
       }
 
@@ -122,6 +124,7 @@ bool CartesianPlanner::planCartesianTrajectory(
   }
 
   response.success = true;
+  response.error_code = ErrorCode::SUCCESS;
   return true;
 }
 
