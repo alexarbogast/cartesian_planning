@@ -37,8 +37,12 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/error_codes.cpp src/cartesian_planner.cpp)
-target_link_libraries(${PROJECT_NAME} 
-  ${catkin_LIBRARIES}
-  Eigen3::Eigen
+add_library(${PROJECT_NAME}
+  src/utility.cpp
+  src/error_codes.cpp
+  src/cartesian_planner.cpp
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} Eigen3::Eigen)
+
+#add_executable(my_test src/test.cpp)
+#target_link_libraries(my_test ${catkin_LIBRARIES} ${PROJECT_NAME})

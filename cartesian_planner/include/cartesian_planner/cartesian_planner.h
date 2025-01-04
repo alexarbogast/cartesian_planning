@@ -3,6 +3,7 @@
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/jntarray.hpp>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 
 #include <cartesian_planner/utility.h>
@@ -38,19 +39,15 @@ public:
                                CartesianPlanningResponse& response);
 
 private:
-  Pose getEndEffectorPose() const;
-  KDL::Jacobian getJacobian() const;
+  Pose getEndEffectorPose(const KDL::JntArray& q) const;
+  KDL::Jacobian getJacobian(const KDL::JntArray& q) const;
 
   Vector6D poseError(const Pose& p1, const Pose& p2) const;
-  inline Vector3D translationError(const Pose& p1, const Pose& p2) const;
 
   unsigned int n_joints_;
   KDL::Chain chain_;
   std::unique_ptr<KDL::ChainFkSolverPos_recursive> fk_pos_solver_;
   std::unique_ptr<KDL::ChainJntToJacSolver> jacobian_solver_;
-
-  KDL::JntArray current_positions_;
-  KDL::JntArray current_velocities_;
 };
 
 }  // namespace cartesian_planner
