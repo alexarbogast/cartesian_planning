@@ -5,7 +5,7 @@
   <description>Messages and service definitions for the cartesian_planning package</description>
   <author email="arbogastaw@gmail.com">Alex Arbogast</author>
   <maintainer email="arbogastaw@gmail.com">Alex Arbogast</maintainer>
-  <license>BSD</license>
+  <license>Apache2</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>message_generation</depend>
