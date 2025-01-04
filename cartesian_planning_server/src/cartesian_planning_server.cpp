@@ -27,6 +27,16 @@ static const std::string NAME = "cartesian_planning_server";
 
 namespace cartesian_planning_server
 {
+
+#define LOAD_ROS_PARAM(nh, param_name, variable)                               \
+  if (!nh.getParam(param_name, variable))                                      \
+  {                                                                            \
+    ROS_ERROR_STREAM("Failed to load " << nh.getNamespace() << "/"             \
+                                       << param_name                           \
+                                       << " from the parameter server.");      \
+    return false;                                                              \
+  }
+
 class CartesianPlanningServer
 {
 public:
@@ -49,32 +59,10 @@ public:
           "nothing found");
       return false;
     }
-    if (!nh_.getParam(robot_description, robot_description))
-    {
-      ROS_ERROR_STREAM("Failed to load " << robot_description
-                                         << " from parameter server");
-      return false;
-    }
-    if (!nh_.getParam("robot_base_link", robot_base_link))
-    {
-      ROS_ERROR_STREAM("Failed to load "
-                       << nh_.getNamespace() + "/robot_base_link"
-                       << " from parameter server");
-      return false;
-    }
-    if (!nh_.getParam("end_effector_link", end_effector_link))
-    {
-      ROS_ERROR_STREAM("Failed to load "
-                       << nh_.getNamespace() + "/end_effector_link"
-                       << " from parameter server");
-      return false;
-    }
-    if (!nh_.getParam("joints", joint_names_))
-    {
-      ROS_FATAL_STREAM("Failed to load " << nh_.getNamespace() << "/joints"
-                                         << " from parameter server");
-      return false;
-    }
+    LOAD_ROS_PARAM(nh_, robot_description, robot_description);
+    LOAD_ROS_PARAM(nh_, "robot_base_link", robot_base_link);
+    LOAD_ROS_PARAM(nh_, "end_effector_link", end_effector_link);
+    LOAD_ROS_PARAM(nh_, "joints", joint_names_);
 
     /* Build kinematic chain */
     KDL::Tree robot_tree;
