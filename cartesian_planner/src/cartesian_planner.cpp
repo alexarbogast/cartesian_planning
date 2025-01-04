@@ -120,7 +120,7 @@ bool CartesianPlanner::planCartesianTrajectory(
       state.qdot.data = dampedPinv(jacobian.data, 0.1) * cart_cmd;
 
       // add joint state to response
-      for (int k = 0; k < n_joints_; ++k)
+      for (size_t k = 0; k < n_joints_; ++k)
       {
         joint_state.positions[k] = state.q(k);
         joint_state.velocities[k] = state.qdot(k);
@@ -129,6 +129,13 @@ bool CartesianPlanner::planCartesianTrajectory(
       response.joint_trajectory.push_back(joint_state);
       time_from_start += segment_time_step;
     }
+  }
+
+  // set initial and final velocities to zero
+  for (size_t i = 0; i < n_joints_; ++i)
+  {
+    response.joint_trajectory.front().velocities[i] = 0;
+    response.joint_trajectory.back().velocities[i] = 0;
   }
 
   response.success = true;
