@@ -15,6 +15,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <memory> // used in macro definition
 
 namespace cartesian_planner
 {
@@ -25,6 +26,12 @@ typedef Eigen::Matrix<double, 6, 6> Matrix6D;
 typedef Eigen::MatrixXd MatrixND;
 typedef Eigen::Isometry3d Pose;
 typedef Eigen::Quaterniond Quaternion;
+
+#define DECLARE_PTR_TYPES(Cls)                                                 \
+  using Ptr = std::shared_ptr<Cls>;                                            \
+  using ConstPtr = std::shared_ptr<const Cls>;                                 \
+  using UniquePtr = std::unique_ptr<Cls>;                                      \
+  using ConstUniquePtr = std::unique_ptr<const Cls>;
 
 /**
  * @brief Find the left pseudoinverse of a matrix

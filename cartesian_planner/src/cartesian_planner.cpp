@@ -79,7 +79,6 @@ bool CartesianPlanner::planCartesianTrajectory(
   joint_state.positions.resize(n_joints_);
   joint_state.velocities.resize(n_joints_);
 
-  Pose current_pose;
   KDL::Jacobian jacobian(n_joints_);
   double time_from_start = 0.0;
 
@@ -114,7 +113,6 @@ bool CartesianPlanner::planCartesianTrajectory(
       {
         response.success = false;
         response.error_code = ErrorCode::MAX_ITERATIONS;
-        std::cout << target.matrix() << std::endl;
         return false;
       }
 

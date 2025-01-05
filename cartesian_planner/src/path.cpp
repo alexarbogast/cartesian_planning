@@ -16,7 +16,7 @@
 
 namespace cartesian_planner
 {
-
+/*=========================== Linear Path ==================================*/
 LinearPath::LinearPath(const Pose& start, const Pose& end)
   : start_(start), end_(end)
 {
@@ -24,6 +24,8 @@ LinearPath::LinearPath(const Pose& start, const Pose& end)
 
 Pose LinearPath::evaluate(double s) const
 {
+  s = std::clamp(s, 0.0, 1.0);
+
   const Vector3D& trans1 = start_.translation();
   const Vector3D& trans2 = end_.translation();
 
@@ -38,6 +40,8 @@ Pose LinearPath::evaluate(double s) const
 
 Twist LinearPath::derivative(double s, double s_dot) const
 {
+  s = std::clamp(s, 0.0, 1.0);
+
   const Vector3D& trans1 = start_.translation();
   const Vector3D& trans2 = end_.translation();
 
@@ -50,6 +54,44 @@ Twist LinearPath::derivative(double s, double s_dot) const
 double LinearPath::length() const
 {
   return (start_.translation() - end_.translation()).norm();
+}
+
+/*=========================== Cubic B-spline ===============================*/
+const CubicBSplinePath::KnotVectorType CubicBSplinePath::UNIFORM_KNOTS =
+    (CubicBSplinePath::KnotVectorType() << -3, -2, -1, 0, 1, 2, 3, 4)
+        .finished();
+
+CubicBSplinePath::CubicBSplinePath(const ControlPointVectorType& control_points,
+                                   const Quaternion& start_orient,
+                                   const Quaternion& end_orient)
+  : spline_(CubicBSplinePath::UNIFORM_KNOTS, control_points)
+  , start_orient_(start_orient)
+  , end_orient_(end_orient)
+{
+}
+
+Pose CubicBSplinePath::evaluate(double s) const
+{
+  s = std::clamp(s, 0.0, 1.0);
+
+  Pose result;
+  result.translation() = spline_(s);
+  result.linear() = start_orient_.slerp(s, end_orient_).matrix();
+  return result;
+}
+
+Twist CubicBSplinePath::derivative(double s, double s_dot) const
+{
+  // TODO: find derivative
+  Twist result = Twist::Zero();
+  result << spline_.derivatives(s, 1) * s_dot, Vector3D::Zero();
+  return result;
+}
+
+double CubicBSplinePath::length() const
+{
+  // TODO: calculate path length!
+  return 0.0;
 }
 
 }  // namespace cartesian_planner

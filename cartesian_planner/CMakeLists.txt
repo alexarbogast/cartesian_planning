@@ -43,6 +43,7 @@ add_library(${PROJECT_NAME}
   src/path.cpp
   src/time_scaling.cpp
   src/trajectory.cpp
+  src/smoothing.cpp
   src/cartesian_planner.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} Eigen3::Eigen)

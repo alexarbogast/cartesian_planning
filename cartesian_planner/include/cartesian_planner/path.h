@@ -14,15 +14,16 @@
 
 #pragma once
 
+#include <unsupported/Eigen/Splines>
 #include <cartesian_planner/utility.h>
 
 namespace cartesian_planner
 {
 
 /**
- * An interface for a generic Cartesian path
+ * An generic interface for parametric Cartesian paths
  *
- * A path maps a sampling parameters "s" to pose in SE(3).
+ * A path maps a sampling parameters "s \in [0, 1]" to a pose in SE(3).
  * A path sampled at a time-scaling s(t) gives a trajectory.
  *
  * p(s): [0, 1] -> SE(3),
@@ -31,6 +32,7 @@ namespace cartesian_planner
 class CartesianPath
 {
 public:
+  DECLARE_PTR_TYPES(CartesianPath);
   virtual ~CartesianPath() = default;
 
   virtual Pose evaluate(double s) const = 0;
@@ -38,13 +40,10 @@ public:
   virtual double length() const = 0;
 };
 
-/**
- * A linear path in SE(3) beginning at the pose "start" and ending at the pose
- * "end"
- */
 class LinearPath : public CartesianPath
 {
 public:
+  DECLARE_PTR_TYPES(LinearPath);
   LinearPath(const Pose& start, const Pose& end);
 
   virtual Pose evaluate(double s) const override;
@@ -54,6 +53,29 @@ public:
 private:
   Pose start_;
   Pose end_;
+};
+
+class CubicBSplinePath : public CartesianPath
+{
+  typedef Eigen::Spline<double, 3, 3> CubicBSpline3d;
+  typedef CubicBSpline3d::ControlPointVectorType ControlPointVectorType;
+  typedef Eigen::Array<double, 8, 1> KnotVectorType;
+
+  static const KnotVectorType UNIFORM_KNOTS;
+
+public:
+  DECLARE_PTR_TYPES(CubicBSplinePath);
+  CubicBSplinePath(const ControlPointVectorType& control_points,
+                   const Quaternion& start_orient = Quaternion::Identity(),
+                   const Quaternion& end_orient = Quaternion::Identity());
+
+  virtual Pose evaluate(double s) const override;
+  virtual Twist derivative(double s, double s_dot) const override;
+  virtual double length() const override;
+
+private:
+  CubicBSpline3d spline_;
+  Quaternion start_orient_, end_orient_;
 };
 
 }  // namespace cartesian_planner
