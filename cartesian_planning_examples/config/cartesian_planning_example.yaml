@@ -1,7 +1,7 @@
 cartesian_planning_server:
   error_threshold: 0.0005
   max_eef_step: 0.001
-  max_step_iterations: 300
+  max_step_iterations: 600
 
   robot_base_link: base_link
   end_effector_link: tool0

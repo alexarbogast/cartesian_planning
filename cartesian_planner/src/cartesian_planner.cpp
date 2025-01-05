@@ -13,13 +13,15 @@
 // limitations under the License.
 
 #include <cartesian_planner/cartesian_planner.h>
-#include <cartesian_planner/utility.h>
+#include <cartesian_planner/trajectory.h>
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <kdl/jntarrayvel.hpp>
 
 namespace cartesian_planner
 {
+static const double max_sampling_step = 0.05;  // sec
+
 CartesianPlanner::CartesianPlanner(const KDL::Chain& chain) : chain_(chain)
 {
   n_joints_ = chain_.getNrOfJoints();
@@ -56,6 +58,22 @@ bool CartesianPlanner::planCartesianTrajectory(
     return true;
   }
 
+  // preprocess paths and create Cartesian trajectory
+  std::size_t n_paths = request.path.size() - 1;
+  std::vector<CartesianTrajectory> trajs;
+  trajs.reserve(n_paths);
+
+  for (auto it = request.path.begin(); it != --request.path.end(); ++it)
+  {
+    const Pose& start_pose = *it;
+    const Pose& end_pose = *std::next(it);
+
+    auto path = std::make_shared<LinearPath>(start_pose, end_pose);
+    double tf = path->length() / request.max_velocity_threshold;
+
+    trajs.emplace_back(path, tf, Order::FIFTH);
+  }
+
   // Initialize a joint trajectory point
   trajectory_msgs::JointTrajectoryPoint joint_state;
   joint_state.positions.resize(n_joints_);
@@ -65,28 +83,15 @@ bool CartesianPlanner::planCartesianTrajectory(
   KDL::Jacobian jacobian(n_joints_);
   double time_from_start = 0.0;
 
-  // Plan the joint trajectory for each segment
-  for (auto it = request.path.begin(); it != --request.path.end(); ++it)
+  // Plan the joint trajectory for each trajectory segment
+  for (const CartesianTrajectory& traj : trajs)
   {
-    const Pose& start_pose = *it;
-    const Pose& end_pose = *std::next(it);
-
-    Eigen::Quaterniond start_quaternion(start_pose.linear());
-    Eigen::Quaterniond end_quaternion(end_pose.linear());
-
-    Vector3D direction = end_pose.translation() - start_pose.translation();
-    double distance = direction.norm();
-    unsigned int n_steps = ceil(distance / request.max_eef_step);
-    double segment_time_step =
-        (distance / request.max_velocity_threshold) / n_steps;
-
-    for (size_t i = 0; i < n_steps; ++i)
+    std::size_t n_steps = ceil(traj.tf() / max_sampling_step);
+    double sampling_step = traj.tf() / n_steps;
+    for (std::size_t i = 0; i < n_steps; ++i)
     {
-      double s = i / (double)n_steps;
-
-      Eigen::Isometry3d target(start_quaternion.slerp(s, end_quaternion));
-      target.translation() =
-          s * end_pose.translation() + (1 - s) * start_pose.translation();
+      double t = i * sampling_step;
+      Pose target = traj.evaluate(t);
 
       // iterate to find joint position
       size_t j = 0;
@@ -109,15 +114,14 @@ bool CartesianPlanner::planCartesianTrajectory(
       {
         response.success = false;
         response.error_code = ErrorCode::MAX_ITERATIONS;
+        std::cout << target.matrix() << std::endl;
         return false;
       }
 
       // find joint velocity
-      Vector6D cart_cmd;
-      cart_cmd << request.max_velocity_threshold * (direction / distance),
-          Vector3D::Zero();
+      Twist twist = traj.derivate(t);
       jacobian = getJacobian(state.q);
-      state.qdot.data = dampedPinv(jacobian.data, 0.1) * cart_cmd;
+      state.qdot.data = dampedPinv(jacobian.data, 0.1) * twist;
 
       // add joint state to response
       for (size_t k = 0; k < n_joints_; ++k)
@@ -127,15 +131,8 @@ bool CartesianPlanner::planCartesianTrajectory(
       }
       joint_state.time_from_start = ros::Duration(time_from_start);
       response.joint_trajectory.push_back(joint_state);
-      time_from_start += segment_time_step;
+      time_from_start += sampling_step;
     }
-  }
-
-  // set initial and final velocities to zero
-  for (size_t i = 0; i < n_joints_; ++i)
-  {
-    response.joint_trajectory.front().velocities[i] = 0;
-    response.joint_trajectory.back().velocities[i] = 0;
   }
 
   response.success = true;

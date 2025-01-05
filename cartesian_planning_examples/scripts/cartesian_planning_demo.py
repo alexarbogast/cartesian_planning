@@ -3,7 +3,7 @@ from copy import deepcopy
 import rospy
 import actionlib
 
-from control_msgs.msg import *
+from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 
@@ -17,7 +17,7 @@ class CartesianPlanningDemo(object):
     def __init__(self):
         self._action_client = actionlib.SimpleActionClient(
             "position_trajectory_controller/follow_joint_trajectory",
-            control_msgs.msg.FollowJointTrajectoryAction,
+            FollowJointTrajectoryAction,
         )
 
         self._planning_client = rospy.ServiceProxy(
@@ -83,9 +83,10 @@ class CartesianPlanningDemo(object):
             return
 
         # send trajectory to action server
-        goal = control_msgs.msg.FollowJointTrajectoryGoal()
+        goal = FollowJointTrajectoryGoal()
         goal.trajectory = resp.trajectory
         self._action_client.send_goal(goal)
+
 
 if __name__ == "__main__":
     rospy.init_node(NAME)
