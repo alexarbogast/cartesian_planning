@@ -19,6 +19,7 @@
 #include <urdf/model.h>
 #include <kdl/jntarray.hpp>
 #include <kdl_parser/kdl_parser.hpp>
+#include "cartesian_planner/time_scaling.h"
 
 #include <cartesian_planner/cartesian_planner.h>
 #include <cartesian_planning_msgs/PlanCartesianTrajectory.h>
@@ -107,6 +108,7 @@ private:
     request.max_eef_step = max_eef_step_;
     request.max_step_iterations = max_step_iterations_;
     request.max_velocity_threshold = req.velocity;
+    request.scaling = static_cast<cartesian_planner::Order>(req.scaling);
 
     auto& q_start = req.start_state.position;
     Eigen::Map<Eigen::VectorXd> start_state(q_start.data(), q_start.size());

@@ -84,7 +84,7 @@ Twist CubicBSplinePath::derivative(double s, double s_dot) const
 {
   // TODO: find derivative
   Twist result = Twist::Zero();
-  result << spline_.derivatives(s, 1) * s_dot, Vector3D::Zero();
+  result << spline_.derivatives<1>(s).col(1) * s_dot, Vector3D::Zero();
   return result;
 }
 

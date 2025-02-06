@@ -43,7 +43,7 @@ using ScalingFunc = std::function<Polynomial(double)>;
 
 enum class Order
 {
-  FIRST,
+  FIRST = 0,
   THIRD,
   FIFTH
 };

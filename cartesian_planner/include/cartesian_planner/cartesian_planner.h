@@ -22,6 +22,7 @@
 
 #include <cartesian_planner/utility.h>
 #include <cartesian_planner/error_codes.h>
+#include <cartesian_planner/time_scaling.h>
 
 namespace cartesian_planner
 {
@@ -34,6 +35,7 @@ struct CartesianPlanningRequest
   double max_eef_step = 0.001;
   double max_velocity_threshold = 0.1;
   unsigned int max_step_iterations = 200;
+  Order scaling = Order::FIRST;
 };
 
 struct CartesianPlanningResponse

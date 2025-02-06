@@ -14,9 +14,11 @@
 
 #include <cartesian_planner/cartesian_planner.h>
 #include <cartesian_planner/trajectory.h>
+#include <cartesian_planner/smoothing.h>
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <kdl/jntarrayvel.hpp>
+#include "cartesian_planner/path.h"
 
 namespace cartesian_planner
 {
@@ -59,9 +61,8 @@ bool CartesianPlanner::planCartesianTrajectory(
   }
 
   // preprocess paths and create Cartesian trajectory
-  std::size_t n_paths = request.path.size() - 1;
   std::vector<CartesianTrajectory> trajs;
-  trajs.reserve(n_paths);
+  trajs.reserve(request.path.size() - 1);
 
   for (auto it = request.path.begin(); it != --request.path.end(); ++it)
   {
@@ -71,7 +72,7 @@ bool CartesianPlanner::planCartesianTrajectory(
     auto path = std::make_shared<LinearPath>(start_pose, end_pose);
     double tf = path->length() / request.max_velocity_threshold;
 
-    trajs.emplace_back(path, tf, Order::FIFTH);
+    trajs.emplace_back(path, tf, request.scaling);
   }
 
   // Initialize a joint trajectory point

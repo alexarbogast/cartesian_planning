@@ -1,6 +1,12 @@
 geometry_msgs/Pose[] path                   # the cartesian path to follow
 sensor_msgs/JointState start_state          # the initial joint state matching the first point in path 
 float64 velocity                            # the velocity at which the path is traversed
+uint8 scaling                               # the time scaling to be used between point-to-point motions
+
+# scaling types
+uint8 SCALING_FIRST = 0
+uint8 SCALING_THIRD = 1
+uint8 SCALING_FIFTH = 2
 
 ---
 
