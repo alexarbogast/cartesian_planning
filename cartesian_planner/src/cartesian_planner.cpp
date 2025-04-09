@@ -57,6 +57,7 @@ bool CartesianPlanner::planCartesianTrajectory(
   if (request.path.size() < 2)
   {
     response.success = true;
+    response.error_code = ErrorCode::SUCCESS;
     return true;
   }
 

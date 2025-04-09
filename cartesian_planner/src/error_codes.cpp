@@ -13,9 +13,16 @@
 // limitations under the License.
 
 #include <cartesian_planner/error_codes.h>
+#include "cartesian_planning_msgs/ErrorCodes.h"
 
 namespace cartesian_planner
 {
+ErrorCode::ErrorCode(int code) { val = code; }
+
+ErrorCode::ErrorCode(const cartesian_planning_msgs::ErrorCodes& code)
+{
+  val = code.val;
+}
 
 const char*
 ErrorCode::toString(const cartesian_planning_msgs::ErrorCodes& error_code)
@@ -23,7 +30,7 @@ ErrorCode::toString(const cartesian_planning_msgs::ErrorCodes& error_code)
   switch (error_code.val)
   {
     case 0:
-      return "NOT INITIALIZE";
+      return "NOT INITIALIZED";
     case cartesian_planning_msgs::ErrorCodes::SUCCESS:
       return "SUCCESS";
     case cartesian_planning_msgs::ErrorCodes::INVALID_ROBOT_STATE:
