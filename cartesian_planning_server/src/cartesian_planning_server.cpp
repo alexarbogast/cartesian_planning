@@ -44,7 +44,7 @@ public:
   CartesianPlanningServer(ros::NodeHandle& nh) : nh_(nh)
   {
     nh_.getParam("error_threshold", error_threshold_);
-    nh_.getParam("max_eef_step", max_eef_step_);
+    nh_.getParam("max_sampling_step", max_sampling_step_);
     nh_.getParam("max_step_iterations", max_step_iterations_);
   }
 
@@ -105,7 +105,7 @@ private:
   {
     cartesian_planner::CartesianPlanningRequest request;
     request.error_threshold = error_threshold_;
-    request.max_eef_step = max_eef_step_;
+    request.max_sampling_step = max_sampling_step_;
     request.max_step_iterations = max_step_iterations_;
     request.max_velocity_threshold = req.velocity;
     request.scaling = static_cast<cartesian_planner::Order>(req.scaling);
@@ -146,7 +146,7 @@ private:
 
   /* Planner request parameters */
   double error_threshold_ = 0.0005;
-  double max_eef_step_ = 0.001;
+  double max_sampling_step_ = 0.05;  // sec
   int max_step_iterations_ = 200;
 };
 

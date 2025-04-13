@@ -22,7 +22,6 @@
 
 namespace cartesian_planner
 {
-static const double max_sampling_step = 0.05;  // sec
 
 CartesianPlanner::CartesianPlanner(const KDL::Chain& chain) : chain_(chain)
 {
@@ -85,10 +84,12 @@ bool CartesianPlanner::planCartesianTrajectory(
   double time_from_start = 0.0;
 
   // Plan the joint trajectory for each trajectory segment
-  for (const CartesianTrajectory& traj : trajs)
+  for (size_t traj_idx = 0; traj_idx < trajs.size(); ++traj_idx)
   {
-    std::size_t n_steps = ceil(traj.tf() / max_sampling_step);
+    const CartesianTrajectory& traj = trajs[traj_idx];
+    std::size_t n_steps = ceil(traj.tf() / request.max_sampling_step);
     double sampling_step = traj.tf() / n_steps;
+    n_steps = (traj_idx == trajs.size() - 1) ? n_steps + 1 : n_steps;
     for (std::size_t i = 0; i < n_steps; ++i)
     {
       double t = i * sampling_step;
