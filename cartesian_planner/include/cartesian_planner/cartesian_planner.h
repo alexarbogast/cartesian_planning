@@ -31,10 +31,13 @@ struct CartesianPlanningRequest
   VectorND start_state;
   std::vector<Pose> path;
 
-  double error_threshold = 0.0005;
-  double max_sampling_step = 0.05;  // sec
-  double max_velocity_threshold = 0.1;
+  double position_threshold = 0.0005;
+  double rotation_threshold = 0.01;  // rad
+  double max_linear_velocity = 0.1;
+  double max_angular_velocity = 1.0;  // rad / s
+  double max_sampling_step = 0.05;       // sec
   unsigned int max_step_iterations = 200;
+  double damping = 0.0;
   Order scaling = Order::FIRST;
 };
 

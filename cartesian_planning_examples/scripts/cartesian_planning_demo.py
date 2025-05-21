@@ -4,6 +4,7 @@ import rospy
 import actionlib
 
 from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
+from trajectory_msgs.msg import JointTrajectoryPoint
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 
@@ -11,6 +12,7 @@ from cartesian_planning_msgs.msg import ErrorCodes
 from cartesian_planning_msgs.srv import *
 
 NAME = "cartesian_planning_demo"
+HOME = [0.0, -1.125, 2.275, -1.15, 1.571, 0.0]
 
 
 class CartesianPlanningDemo(object):
@@ -33,7 +35,22 @@ class CartesianPlanningDemo(object):
 
         rospy.loginfo("Ready to plan!")
 
+    def move_home(self):
+        goal = FollowJointTrajectoryGoal()
+        start_state = rospy.wait_for_message("/joint_states", JointState)
+        goal.trajectory.joint_names = start_state.name
+
+        point = JointTrajectoryPoint()
+        point.positions = HOME
+        point.velocities = [0] * 6
+        point.accelerations = [0] * 6
+        point.time_from_start = rospy.Duration(2)
+        goal.trajectory.points = [point]
+        self._action_client.send_goal(goal)
+        self._action_client.wait_for_result()
+
     def run(self):
+        self.move_home()
         req = PlanCartesianTrajectoryRequest()
 
         # set start state
@@ -66,7 +83,9 @@ class CartesianPlanningDemo(object):
             req.path.append(deepcopy(pose))
 
         # set velocity
-        req.velocity = 0.200
+        req.max_linear_velocity = 0.200
+        req.max_angular_velocity = 1.0
+        req.scaling = PlanCartesianTrajectoryRequest.SCALING_FIRST
         resp = PlanCartesianTrajectoryResponse()
         try:
             resp = self._planning_client(req)

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   control_msgs
+  trajectory_msgs
   actionlib
   cartesian_planning_server
 )
@@ -20,6 +21,7 @@ catkin_package(CATKIN_DEPENDS
   rospy
   sensor_msgs
   control_msgs
+  trajectory_msgs
   actionlib
   cartesian_planning_server
 )

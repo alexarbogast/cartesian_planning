@@ -15,7 +15,7 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <memory> // used in macro definition
+#include <memory>  // used in macro definition
 
 namespace cartesian_planner
 {
@@ -26,6 +26,7 @@ typedef Eigen::Matrix<double, 6, 6> Matrix6D;
 typedef Eigen::MatrixXd MatrixND;
 typedef Eigen::Isometry3d Pose;
 typedef Eigen::Quaterniond Quaternion;
+typedef Eigen::AngleAxisd AngleAxis;
 
 #define DECLARE_PTR_TYPES(Cls)                                                 \
   using Ptr = std::shared_ptr<Cls>;                                            \

@@ -42,12 +42,15 @@ Twist LinearPath::derivative(double s, double s_dot) const
 {
   s = std::clamp(s, 0.0, 1.0);
 
-  const Vector3D& trans1 = start_.translation();
-  const Vector3D& trans2 = end_.translation();
-
-  // TODO: Rotation derivative
   Twist twist;
-  twist << (trans2 - trans1) * s_dot, Vector3D::Zero();
+  twist.head<3>() = (end_.translation() - start_.translation()) * s_dot;
+
+  Quaternion orient1(start_.linear());
+  Quaternion orient2(end_.linear());
+  Quaternion q = orient1.slerp(s, orient2);
+
+  AngleAxis aa(orient1.inverse() * orient2);
+  twist.tail<3>() = q * (aa.axis() * aa.angle() * s_dot);
   return twist;
 }
 

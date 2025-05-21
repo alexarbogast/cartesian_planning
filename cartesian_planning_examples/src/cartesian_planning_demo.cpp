@@ -1,12 +1,14 @@
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
+#include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <sensor_msgs/JointState.h>
 
 #include <cartesian_planning_msgs/ErrorCodes.h>
 #include <cartesian_planning_msgs/PlanCartesianTrajectory.h>
 
-static const std::string NAME = "cartesian_planning_demo";
+const std::string NAME = "cartesian_planning_demo";
+const std::vector<double> HOME = { 0.0, -1.125, 2.275, -1.15, 1.571, 0.0 };
 
 class CartesianPlanningDemo
 {
@@ -29,8 +31,26 @@ public:
     ROS_INFO("Ready to plan!");
   }
 
+  void move_home()
+  {
+    control_msgs::FollowJointTrajectoryGoal goal;
+    auto start_state = ros::topic::waitForMessage<sensor_msgs::JointState>(
+        "/joint_states", nh_);
+    goal.trajectory.joint_names = start_state->name;
+
+    trajectory_msgs::JointTrajectoryPoint point;
+    point.positions = HOME;
+    point.velocities = std::vector<double>(6, 0.0);
+    point.accelerations = std::vector<double>(6, 0.0);
+    point.time_from_start = ros::Duration(2);
+    goal.trajectory.points.push_back(point);
+    action_client_->sendGoal(goal);
+    action_client_->waitForResult();
+  }
+
   void run()
   {
+    move_home();
     cartesian_planning_msgs::PlanCartesianTrajectory srv;
 
     /* Set start state */
@@ -60,7 +80,10 @@ public:
     }
 
     /* Set velocity */
-    srv.request.velocity = 0.200;
+    srv.request.max_linear_velocity = 0.200;
+    srv.request.max_angular_velocity = 1.0;
+    srv.request.scaling =
+        cartesian_planning_msgs::PlanCartesianTrajectoryRequest::SCALING_FIRST;
     planning_client_.call(srv);
 
     if (srv.response.error_code.val !=

@@ -43,9 +43,11 @@ class CartesianPlanningServer
 public:
   CartesianPlanningServer(ros::NodeHandle& nh) : nh_(nh)
   {
-    nh_.getParam("error_threshold", error_threshold_);
+    nh_.getParam("position_threshold", position_threshold_);
+    nh_.getParam("rotation_threshold", rotation_threshold_);
     nh_.getParam("max_sampling_step", max_sampling_step_);
     nh_.getParam("max_step_iterations", max_step_iterations_);
+    nh_.getParam("damping", damping_);
   }
 
   bool init()
@@ -104,10 +106,12 @@ private:
       cartesian_planning_msgs::PlanCartesianTrajectory::Response& res)
   {
     cartesian_planner::CartesianPlanningRequest request;
-    request.error_threshold = error_threshold_;
+    request.position_threshold = position_threshold_;
     request.max_sampling_step = max_sampling_step_;
     request.max_step_iterations = max_step_iterations_;
-    request.max_velocity_threshold = req.velocity;
+    request.damping = damping_;
+    request.max_linear_velocity = req.max_linear_velocity;
+    request.max_angular_velocity = req.max_angular_velocity;
     request.scaling = static_cast<cartesian_planner::Order>(req.scaling);
 
     auto& q_start = req.start_state.position;
@@ -145,9 +149,11 @@ private:
   std::unique_ptr<cartesian_planner::CartesianPlanner> planner_;
 
   /* Planner request parameters */
-  double error_threshold_ = 0.0005;
+  double position_threshold_ = 0.0005;
+  double rotation_threshold_ = 0.01;
   double max_sampling_step_ = 0.05;  // sec
   int max_step_iterations_ = 200;
+  double damping_ = 0.0;
 };
 
 }  // namespace cartesian_planning_server

@@ -18,7 +18,6 @@
 
 #include <eigen_conversions/eigen_kdl.h>
 #include <kdl/jntarrayvel.hpp>
-#include "cartesian_planner/path.h"
 
 namespace cartesian_planner
 {
@@ -46,9 +45,9 @@ bool CartesianPlanner::planCartesianTrajectory(
 
   // Add starting pose to path if we start farther than threshold
   Pose start_pose = getEndEffectorPose(state.q);
-  double initial_trans_error =
-      (start_pose.translation() - request.path[0].translation()).norm();
-  if (initial_trans_error > request.error_threshold)
+  Vector6D initial_error = poseError(start_pose, request.path[0]);
+  if (initial_error.head<3>().norm() > request.position_threshold ||
+      initial_error.tail<3>().norm() > request.rotation_threshold)
   {
     request.path.insert(request.path.begin(), start_pose);
   }
@@ -70,9 +69,12 @@ bool CartesianPlanner::planCartesianTrajectory(
     const Pose& end_pose = *std::next(it);
 
     auto path = std::make_shared<LinearPath>(start_pose, end_pose);
-    double tf = path->length() / request.max_velocity_threshold;
+    double t_trans = path->length() / request.max_linear_velocity;
 
-    trajs.emplace_back(path, tf, request.scaling);
+    AngleAxis aa(start_pose.rotation() * end_pose.rotation().inverse());
+    double t_rot = aa.angle() / request.max_angular_velocity;
+
+    trajs.emplace_back(path, std::max(t_trans, t_rot), request.scaling);
   }
 
   // Initialize a joint trajectory point
@@ -102,14 +104,16 @@ bool CartesianPlanner::planCartesianTrajectory(
         Pose current_pose = getEndEffectorPose(state.q);
         Vector6D error = poseError(current_pose, target);
 
-        if (error.head<3>().norm() < request.error_threshold)
+        if (error.head<3>().norm() < request.position_threshold &&
+            error.tail<3>().norm() < request.rotation_threshold)
         {
           break;
         }
         jacobian = getJacobian(state.q);
 
         KDL::JntArray dq(n_joints_);
-        dq.data = dampedPinv(jacobian.data, 0.1) * error;
+        dq.data = dampedPinv(jacobian.data, request.damping) * error;
+
         state.q.data += dq.data;
       }
       if (j == request.max_step_iterations)
@@ -122,7 +126,7 @@ bool CartesianPlanner::planCartesianTrajectory(
       // find joint velocity
       Twist twist = traj.derivate(t);
       jacobian = getJacobian(state.q);
-      state.qdot.data = dampedPinv(jacobian.data, 0.1) * twist;
+      state.qdot.data = rightPinv(jacobian.data) * twist;
 
       // add joint state to response
       for (size_t k = 0; k < n_joints_; ++k)
@@ -160,14 +164,11 @@ KDL::Jacobian CartesianPlanner::getJacobian(const KDL::JntArray& q) const
 
 Vector6D CartesianPlanner::poseError(const Pose& p1, const Pose& p2) const
 {
-  Vector3D trans_error = p2.translation() - p1.translation();
-
-  Eigen::Quaterniond orient1(p1.rotation());
-  Eigen::Quaterniond orient2(p2.rotation());
-  Vector3D orient_error = (orient2 * orient1.inverse()).vec();
-
   Vector6D error;
-  error << trans_error, orient_error;
+  error.head<3>() = p2.translation() - p1.translation();
+
+  AngleAxis aa(p2.rotation() * p1.rotation().inverse());
+  error.tail<3>() = aa.axis() * aa.angle();
   return error;
 }
 
