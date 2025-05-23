@@ -140,6 +140,10 @@ bool CartesianPlanner::planCartesianTrajectory(
     }
   }
 
+  // set the start and end velocities to zero
+  response.joint_trajectory.front().velocities.assign(n_joints_, 0.0);
+  response.joint_trajectory.back().velocities.assign(n_joints_, 0.0);
+
   response.success = true;
   response.error_code = ErrorCode::SUCCESS;
   return true;
