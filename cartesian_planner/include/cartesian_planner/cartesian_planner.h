@@ -18,7 +18,7 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/jntarray.hpp>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 #include <cartesian_planner/utility.h>
 #include <cartesian_planner/error_codes.h>
@@ -35,7 +35,7 @@ struct CartesianPlanningRequest
   double rotation_threshold = 0.01;  // rad
   double max_linear_velocity = 0.1;
   double max_angular_velocity = 1.0;  // rad / s
-  double max_sampling_step = 0.05;       // sec
+  double max_sampling_step = 0.05;    // sec
   unsigned int max_step_iterations = 200;
   double damping = 0.0;
   Order scaling = Order::FIRST;
@@ -46,7 +46,7 @@ struct CartesianPlanningResponse
   bool success = false;
   ErrorCode error_code;
 
-  std::vector<trajectory_msgs::JointTrajectoryPoint> joint_trajectory;
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint> joint_trajectory;
 };
 
 class CartesianPlanner

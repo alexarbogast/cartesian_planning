@@ -1,22 +1,26 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(cartesian_planning_msgs)
 
-find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  sensor_msgs
-  geometry_msgs
-  trajectory_msgs
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(trajectory_msgs REQUIRED)
+
+set(msg_files
+  "msg/ErrorCodes.msg"
 )
 
-add_message_files(DIRECTORY msg FILES ErrorCodes.msg)
-add_service_files(DIRECTORY srv FILES PlanCartesianTrajectory.srv)
-generate_messages(DEPENDENCIES sensor_msgs geometry_msgs trajectory_msgs)
-
-catkin_package(CATKIN_DEPENDS
-  message_runtime
-  sensor_msgs
-  geometry_msgs
-  trajectory_msgs
+set(srv_files
+  "srv/PlanCartesianTrajectory.srv"
 )
 
-include_directories(${catkin_INCLUDE_DIRS})
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+  ${srv_files}
+  DEPENDENCIES sensor_msgs geometry_msgs trajectory_msgs
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+ament_package()

@@ -1,39 +1,25 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(cartesian_planner)
 
-if(NOT CMAKE_BUILD_TYPE) 
+if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  urdf
-  kdl_parser
-  eigen_conversions
-  trajectory_msgs
-  cartesian_planning_msgs
-)
-
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(urdf REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(trajectory_msgs REQUIRED)
+find_package(cartesian_planning_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
-
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS
-    roscpp
-    urdf
-    kdl_parser
-    eigen_conversions
-    trajectory_msgs
-    cartesian_planning_msgs
-)
 
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
 
@@ -46,7 +32,41 @@ add_library(${PROJECT_NAME}
   src/smoothing.cpp
   src/cartesian_planner.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} Eigen3::Eigen)
 
-# add_executable(my_test src/test.cpp)
-# target_link_libraries(my_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+ament_target_dependencies(${PROJECT_NAME}
+  rclcpp
+  urdf
+  kdl_parser
+  tf2_eigen
+  trajectory_msgs
+  cartesian_planning_msgs
+  Eigen3
+)
+
+# Export include dirs and libraries
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(
+  rclcpp
+  urdf
+  kdl_parser
+  tf2_eigen
+  trajectory_msgs
+  cartesian_planning_msgs
+  Eigen3
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+ament_package()

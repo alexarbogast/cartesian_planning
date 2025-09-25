@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <ctime>
+#include <rclcpp/duration.hpp>
 #include <cartesian_planner/cartesian_planner.h>
 #include <cartesian_planner/trajectory.h>
 #include <cartesian_planner/smoothing.h>
 
-#include <eigen_conversions/eigen_kdl.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <kdl/jntarrayvel.hpp>
 
 namespace cartesian_planner
@@ -78,7 +80,7 @@ bool CartesianPlanner::planCartesianTrajectory(
   }
 
   // Initialize a joint trajectory point
-  trajectory_msgs::JointTrajectoryPoint joint_state;
+  trajectory_msgs::msg::JointTrajectoryPoint joint_state;
   joint_state.positions.resize(n_joints_);
   joint_state.velocities.resize(n_joints_);
 
@@ -134,7 +136,7 @@ bool CartesianPlanner::planCartesianTrajectory(
         joint_state.positions[k] = state.q(k);
         joint_state.velocities[k] = state.qdot(k);
       }
-      joint_state.time_from_start = ros::Duration(time_from_start);
+      joint_state.time_from_start = rclcpp::Duration::from_seconds(time_from_start);
       response.joint_trajectory.push_back(joint_state);
       time_from_start += sampling_step;
     }
@@ -155,7 +157,7 @@ Pose CartesianPlanner::getEndEffectorPose(const KDL::JntArray& q) const
   fk_pos_solver_->JntToCart(q, pose_kdl);
 
   Pose current_pose;
-  tf::transformKDLToEigen(pose_kdl, current_pose);
+  tf2::fromMsg(pose_kdl, current_pose);
   return current_pose;
 }
 

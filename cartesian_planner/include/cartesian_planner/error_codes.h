@@ -14,23 +14,23 @@
 
 #pragma once
 
-#include <cartesian_planning_msgs/ErrorCodes.h>
+#include <cartesian_planning_msgs/msg/error_codes.hpp>
 
 namespace cartesian_planner
 {
 
-class ErrorCode : public cartesian_planning_msgs::ErrorCodes
+class ErrorCode : public cartesian_planning_msgs::msg::ErrorCodes
 {
 public:
   static const char*
-  toString(const cartesian_planning_msgs::ErrorCodes& error_code);
+  toString(const cartesian_planning_msgs::msg::ErrorCodes& error_code);
 
   ErrorCode(int code = 0);
-  ErrorCode(const cartesian_planning_msgs::ErrorCodes& code);
+  ErrorCode(const cartesian_planning_msgs::msg::ErrorCodes& code);
 
   explicit inline operator bool() const
   {
-    return val == cartesian_planning_msgs::ErrorCodes::SUCCESS;
+    return val == cartesian_planning_msgs::msg::ErrorCodes::SUCCESS;
   }
 
   explicit inline operator std::string() const { return toString(*this); }
