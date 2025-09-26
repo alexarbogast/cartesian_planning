@@ -28,7 +28,8 @@ ament_target_dependencies(cartesian_planning_demo
 )
 
 install(TARGETS cartesian_planning_demo
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(PROGRAMS
   scripts/cartesian_planning_demo.py

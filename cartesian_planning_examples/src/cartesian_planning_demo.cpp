@@ -3,8 +3,6 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include <control_msgs/action/follow_joint_trajectory.hpp>
-#include <rclcpp_action/types.hpp>
-#include <sensor_msgs/msg/detail/joint_state__struct.hpp>
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
@@ -69,29 +67,28 @@ public:
     point.time_from_start = rclcpp::Duration(2s);
     goal_msg.trajectory.points.push_back(point);
 
-    auto send_goal_options =
-        rclcpp_action::Client<FollowJointTrajectory>::SendGoalOptions();
-
-    send_goal_options.result_callback = [this](const auto& result) {
-      RCLCPP_INFO(this->get_logger(), "Goal finished with code %i",
-                  static_cast<int>(result.code));
-    };
-
-    auto goal_future =
-        action_client_->async_send_goal(goal_msg, send_goal_options);
-
+    auto goal_future = action_client_->async_send_goal(goal_msg);
     if (rclcpp::spin_until_future_complete(shared_from_this(), goal_future) !=
         rclcpp::FutureReturnCode::SUCCESS)
     {
       RCLCPP_ERROR(this->get_logger(),
                    "FollowJointTrajectory: failed sending goal");
+      return;
     }
 
     auto goal_handle_ = goal_future.get();
     if (!goal_handle_)
     {
-      RCLCPP_ERROR(this->get_logger(),
-                   "FollowJointTrajectory client: failed sending goal");
+      RCLCPP_ERROR(this->get_logger(), "FollowJointTrajectory: goal rejected");
+      return;
+    }
+
+    auto result_future = action_client_->async_get_result(goal_handle_);
+    if (rclcpp::spin_until_future_complete(shared_from_this(), result_future) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(this->get_logger(), "FollowJointTrajectory: failed");
+      return;
     }
   }
 
@@ -134,7 +131,7 @@ public:
     request->max_linear_velocity = 0.200;
     request->max_angular_velocity = 1.0;
     request->scaling = cartesian_planning_msgs::srv::PlanCartesianTrajectory::
-        Request::SCALING_FIRST;
+        Request::SCALING_FIFTH;
 
     // Plan Cartesian trajectory
     auto future = planning_client_->async_send_request(request);
@@ -167,13 +164,22 @@ public:
     {
       RCLCPP_ERROR(this->get_logger(),
                    "FollowJointTrajectory: failed sending goal");
+      return;
     }
 
     auto goal_handle_ = goal_future.get();
     if (!goal_handle_)
     {
-      RCLCPP_ERROR(this->get_logger(),
-                   "FollowJointTrajectory client: failed sending goal");
+      RCLCPP_ERROR(this->get_logger(), "FollowJointTrajectory: goal rejected");
+      return;
+    }
+
+    auto result_future = action_client_->async_get_result(goal_handle_);
+    if (rclcpp::spin_until_future_complete(shared_from_this(), result_future) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR(this->get_logger(), "FollowJointTrajectory: failed");
+      return;
     }
   }
 

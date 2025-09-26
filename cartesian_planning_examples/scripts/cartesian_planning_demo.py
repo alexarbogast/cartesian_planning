@@ -1,61 +1,86 @@
+#!/usr/bin/env python3
+
 from copy import deepcopy
 
-import rospy
-import actionlib
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionClient
+from rclpy.wait_for_message import wait_for_message
 
-from control_msgs.msg import FollowJointTrajectoryGoal, FollowJointTrajectoryAction
+from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 
 from cartesian_planning_msgs.msg import ErrorCodes
-from cartesian_planning_msgs.srv import *
+from cartesian_planning_msgs.srv import PlanCartesianTrajectory
 
 NAME = "cartesian_planning_demo"
-HOME = [0.0, -1.125, 2.275, -1.15, 1.571, 0.0]
+HOME = {
+    "joint1": 0.0,
+    "joint2": -1.125,
+    "joint3": 2.275,
+    "joint4": -1.15,
+    "joint5": 1.571,
+    "joint6": 0.0,
+}
 
 
-class CartesianPlanningDemo(object):
+class CartesianPlanningDemo(Node):
     def __init__(self):
-        self._action_client = actionlib.SimpleActionClient(
-            "position_trajectory_controller/follow_joint_trajectory",
-            FollowJointTrajectoryAction,
+        super().__init__(NAME)
+
+        self._action_client = ActionClient(
+            self,
+            FollowJointTrajectory,
+            "joint_trajectory_controller/follow_joint_trajectory",
         )
 
-        self._planning_client = rospy.ServiceProxy(
-            "cartesian_planning_server/plan_cartesian_trajectory",
+        self._planning_client = self.create_client(
             PlanCartesianTrajectory,
+            "cartesian_planning_server/plan_cartesian_trajectory",
         )
 
-        rospy.loginfo("Waiting for plan_cartesian_trajectory server...")
+        self.get_logger().info("Waiting for plan_cartesian_trajectory server...")
         self._planning_client.wait_for_service()
 
-        rospy.loginfo("Waiting for follow_trajectory_action server...")
+        self.get_logger().info("Waiting for follow_trajectory_action server...")
         self._action_client.wait_for_server()
 
-        rospy.loginfo("Ready to plan!")
+        self.get_logger().info("Ready to plan!")
 
     def move_home(self):
-        goal = FollowJointTrajectoryGoal()
-        start_state = rospy.wait_for_message("/joint_states", JointState)
+        _, start_state = wait_for_message(JointState, self, "/joint_states")
+
+        goal = FollowJointTrajectory.Goal()
         goal.trajectory.joint_names = start_state.name
 
         point = JointTrajectoryPoint()
-        point.positions = HOME
-        point.velocities = [0] * 6
-        point.accelerations = [0] * 6
-        point.time_from_start = rospy.Duration(2)
+        point.positions = [HOME[joint] for joint in goal.trajectory.joint_names]
+        point.velocities = [0.0] * len(HOME)
+        point.accelerations = [0.0] * len(HOME)
+        point.time_from_start.sec = 2
         goal.trajectory.points = [point]
-        self._action_client.send_goal(goal)
-        self._action_client.wait_for_result()
+
+        send_goal_future = self._action_client.send_goal_async(goal)
+        rclpy.spin_until_future_complete(self, send_goal_future)
+        goal_handle = send_goal_future.result()
+        if not goal_handle:
+            self.get_logger().error("FollowJointTrajectory: goal rejected")
+
+        result_future = goal_handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future)
 
     def run(self):
         self.move_home()
-        req = PlanCartesianTrajectoryRequest()
 
-        # set start state
-        start_state = rospy.wait_for_message("/joint_states", JointState)
-        req.start_state = start_state
+        _, start_state = wait_for_message(JointState, self, "/joint_states")
+        if start_state is None:
+            self.get_logger().error("Invalid joint state")
+            return
+
+        request = PlanCartesianTrajectory.Request()
+        request.start_state = start_state
 
         path = [
             (0.7, 0.3, 0.1),
@@ -69,46 +94,53 @@ class CartesianPlanningDemo(object):
             (0.7, 0.3, 0.1),
         ]
 
-        # create path
         pose = Pose()
-        pose.orientation.x = 0.0
-        pose.orientation.y = 0.707107
-        pose.orientation.z = 0.707107
-        pose.orientation.w = 0.0
+        pose.orientation.x = 0.5
+        pose.orientation.y = 0.5
+        pose.orientation.z = 0.5
+        pose.orientation.w = 0.5
 
-        for point in path:
-            pose.position.x = point[0]
-            pose.position.y = point[1]
-            pose.position.z = point[2]
-            req.path.append(deepcopy(pose))
+        for x, y, z in path:
+            pose.position.x = x
+            pose.position.y = y
+            pose.position.z = z
+            request.path.append(deepcopy(pose))
 
-        # set velocity
-        req.max_linear_velocity = 0.200
-        req.max_angular_velocity = 1.0
-        req.scaling = PlanCartesianTrajectoryRequest.SCALING_FIRST
-        resp = PlanCartesianTrajectoryResponse()
-        try:
-            resp = self._planning_client(req)
-        except rospy.ServiceException as e:
-            rospy.logerr(f"Cartesian planning service failed with exception: {e}")
+        request.max_linear_velocity = 0.200
+        request.max_angular_velocity = 1.0
+        request.scaling = PlanCartesianTrajectory.Request.SCALING_FIFTH
+
+        future = self._planning_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        if not future.done():
+            self.get_logger().error("Planning service call failed")
             return
+        response = future.result()
 
-        if not resp.error_code.val == ErrorCodes.SUCCESS:
-            rospy.logerr(
-                "Failed to plan Cartesian trajectory. "
-                + "Planning service returned with ERROR_CODE: "
-                + str(resp.error_code.val)
+        if response.error_code.val != ErrorCodes.SUCCESS:
+            self.get_logger().error(
+                f"Failed to plan Cartesian trajectory. Error code: {response.error_code.val}"
             )
             return
 
-        # send trajectory to action server
-        goal = FollowJointTrajectoryGoal()
-        goal.trajectory = resp.trajectory
-        self._action_client.send_goal(goal)
+        goal_msg = FollowJointTrajectory.Goal()
+        goal_msg.trajectory = response.trajectory
+
+        send_goal_future = self._action_client.send_goal_async(goal_msg)
+        rclpy.spin_until_future_complete(self, send_goal_future)
+        goal_handle = send_goal_future.result()
+        if not goal_handle.accepted:
+            self.get_logger().error("Planned trajectory goal rejected")
+            return
+
+        result_future = goal_handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future)
+        self.get_logger().info("Trajectory execution completed")
 
 
 if __name__ == "__main__":
-    rospy.init_node(NAME)
-
+    rclpy.init()
     demo = CartesianPlanningDemo()
     demo.run()
+    demo.destroy_node()
+    rclpy.shutdown()
