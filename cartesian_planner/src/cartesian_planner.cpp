@@ -18,6 +18,7 @@
 #include <cartesian_planner/trajectory.h>
 #include <cartesian_planner/smoothing.h>
 
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <kdl/jntarrayvel.hpp>
 
@@ -157,7 +158,7 @@ Pose CartesianPlanner::getEndEffectorPose(const KDL::JntArray& q) const
   fk_pos_solver_->JntToCart(q, pose_kdl);
 
   Pose current_pose;
-  tf2::fromMsg(pose_kdl, current_pose);
+  tf2::transformKDLToEigen(pose_kdl, current_pose);
   return current_pose;
 }
 

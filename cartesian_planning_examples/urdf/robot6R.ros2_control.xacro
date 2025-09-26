@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="robot6R_ros2_control">
+
+    <ros2_control name="ros2_control" type="system">
+      <hardware>
+        <plugin>mock_components/GenericSystem</plugin>
+      </hardware>
+      <joint name="joint1">
+        <command_interface name="position">
+          <param name="min">${-2.0 * pi}</param>
+          <param name="max">${2.0 * pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="joint2">
+        <command_interface name="position">
+          <param name="min">${-2.0 * pi}</param>
+          <param name="max">${2.0 * pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">-1.125</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="joint3">
+        <command_interface name="position">
+          <param name="min">${-pi}</param>
+          <param name="max">${pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">2.275</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="joint4">
+        <command_interface name="position">
+          <param name="min">${-2.0 * pi}</param>
+          <param name="max">${2.0 * pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">-1.15</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="joint5">
+        <command_interface name="position">
+          <param name="min">${-2.0 * pi}</param>
+          <param name="max">${2.0 * pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">1.571</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+      <joint name="joint6">
+        <command_interface name="position">
+          <param name="min">${-2.0 * pi}</param>
+          <param name="max">${2.0 * pi}</param>
+        </command_interface>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+
+  </xacro:macro>
+</robot>

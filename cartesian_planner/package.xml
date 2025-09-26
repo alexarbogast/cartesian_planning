@@ -12,6 +12,7 @@
   <depend>rclcpp</depend>
   <depend>urdf</depend>
   <depend>kdl_parser</depend>
+  <depend>tf2_eigen_kdl</depend>
   <depend>tf2_eigen</depend>
   <depend>trajectory_msgs</depend>
   <depend>cartesian_planning_msgs</depend>

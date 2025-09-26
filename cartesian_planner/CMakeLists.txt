@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
 find_package(kdl_parser REQUIRED)
+find_package(tf2_eigen_kdl REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(cartesian_planning_msgs REQUIRED)
@@ -37,6 +38,7 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   urdf
   kdl_parser
+  tf2_eigen_kdl
   tf2_eigen
   trajectory_msgs
   cartesian_planning_msgs
@@ -50,6 +52,7 @@ ament_export_dependencies(
   rclcpp
   urdf
   kdl_parser
+  tf2_eigen_kdl
   tf2_eigen
   trajectory_msgs
   cartesian_planning_msgs

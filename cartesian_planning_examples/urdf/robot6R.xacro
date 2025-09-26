@@ -234,4 +234,7 @@
     </visual>
   </link>
 
+  <!-- ROS2 control tags -->
+  <xacro:include filename="$(find cartesian_planning_examples)/urdf/robot6R.ros2_control.xacro"/>
+  <xacro:robot6R_ros2_control/>
 </robot>

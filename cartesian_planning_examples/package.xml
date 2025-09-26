@@ -1,26 +1,31 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>cartesian_planning_examples</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>The cartesian_planning_examples package</description>
   <author email="arbogastaw@gmail.com">Alex Arbogast</author>
   <maintainer email="arbogastaw@gmail.com">Alex Arbogast</maintainer>
   <license>Apache2</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>xacro</exec_depend>
-  <exec_depend>rviz</exec_depend>
+  <exec_depend>rviz2</exec_depend>
   <exec_depend>joint_state_controller</exec_depend>
   <exec_depend>ros_control_boilerplate</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
+  <depend>cartesian_planning_server</depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>rclcpp_action</depend>
   <depend>sensor_msgs</depend>
   <depend>control_msgs</depend>
   <depend>trajectory_msgs</depend>
-  <depend>actionlib</depend>
-  <depend>cartesian_planning_server</depend>
+  <depend>cartesian_planning_msgs</depend>
 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
