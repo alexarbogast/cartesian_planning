@@ -74,10 +74,12 @@ class CartesianPlanningDemo(Node):
     def run(self):
         self.move_home()
 
-        _, start_state = wait_for_message(JointState, self, "/joint_states")
+        joint_state_topic = "/joint_states"
+        _, start_state = wait_for_message(JointState, self, joint_state_topic)
         if start_state is None:
-            self.get_logger().error("Invalid joint state")
-            return
+            msg = "Timed out waiting for JointState on topic: " + joint_state_topic
+            self.get_logger().error(msg)
+            raise RuntimeError(msg)
 
         request = PlanCartesianTrajectory.Request()
         request.start_state = start_state

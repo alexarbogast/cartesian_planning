@@ -1,42 +1,34 @@
-from re import S
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import (
     LaunchConfiguration,
     PathJoinSubstitution,
     FindExecutable,
-    Command
+    Command,
 )
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
-    controller_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare("cartesian_planning_examples"),
-            "config",
-            "example_controllers.yaml",
-        ]
-    )
+    controller_config_file = PathJoinSubstitution([
+        FindPackageShare("cartesian_planning_examples"),
+        "config",
+        "example_controllers.yaml",
+    ])
 
-    cartesian_planning_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare("cartesian_planning_examples"),
-            "config",
-            "cartesian_planning_example.yaml",
-        ]
-    )
+    cartesian_planning_config_file = PathJoinSubstitution([
+        FindPackageShare("cartesian_planning_examples"),
+        "config",
+        "cartesian_planning_example.yaml",
+    ])
 
-    rviz_config_file = PathJoinSubstitution(
-        [
-            FindPackageShare("cartesian_planning_examples"),
-            "config",
-            "cartesian_planning_example.rviz",
-        ]
-    )
+    rviz_config_file = PathJoinSubstitution([
+        FindPackageShare("cartesian_planning_examples"),
+        "config",
+        "cartesian_planning_example.rviz",
+    ])
 
     declared_arguments = []
     declared_arguments.append(
@@ -57,7 +49,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "controller_config",
             default_value=controller_config_file,
-            description="Path to the configuration file for ros2_control"
+            description="Path to the configuration file for ros2_control",
         )
     )
     prefix = LaunchConfiguration("prefix")
@@ -74,10 +66,11 @@ def generate_launch_description():
                 "robot6R.xacro",
             ]
         ),
-        " use_mock_hardware:=", use_mock_hardware,
-        " prefix:=", prefix,
+        " use_mock_hardware:=",
+        use_mock_hardware,
+        " prefix:=",
+        prefix,
     ])
-
 
     control_node = Node(
         package="controller_manager",
@@ -95,7 +88,8 @@ def generate_launch_description():
         arguments=[
             "joint_state_broadcaster",
             "joint_trajectory_controller",
-            "--controller-manager", "controller_manager",
+            "--controller-manager",
+            "controller_manager",
         ],
     )
 
@@ -104,9 +98,7 @@ def generate_launch_description():
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="screen",
-        parameters=[
-            {"robot_description": robot_description}
-        ],
+        parameters=[{"robot_description": robot_description}],
     )
 
     cartesian_planning_server = Node(
@@ -116,7 +108,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             cartesian_planning_config_file,
-            {'robot_description': robot_description}
+            {"robot_description": robot_description},
         ],
     )
 
@@ -133,7 +125,7 @@ def generate_launch_description():
         controller_spawner,
         robot_state_publisher_node,
         cartesian_planning_server,
-        rviz_node
+        rviz_node,
     ]
 
     return LaunchDescription(declared_arguments + nodes_to_start)
