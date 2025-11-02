@@ -11,8 +11,6 @@
 
   <exec_depend>xacro</exec_depend>
   <exec_depend>rviz2</exec_depend>
-  <exec_depend>joint_state_controller</exec_depend>
-  <exec_depend>ros_control_boilerplate</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <depend>cartesian_planning_server</depend>
