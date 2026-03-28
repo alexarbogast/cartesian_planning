@@ -1,0 +1,23 @@
+name: ROS2 CI
+
+on:
+  push:
+    branches: [ros2]
+  pull_request:
+    branches: [ros2]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ros_distro: [humble, jazzy]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: 'ros-industrial/industrial_ci@master'
+        env:
+          ROS_DISTRO: ${{ matrix.ros_distro }}
+          ROS_REPO: main
+          BUILDER: colcon
+          ROS_WS: src

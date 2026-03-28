@@ -1,5 +1,10 @@
 # Cartesian Planning
 
+[![license - apache 2.0](https://img.shields.io/:license-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
+[![ROS2 CI](https://github.com/alexarbogast/cartesian_planning/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/alexarbogast/cartesian_planning/actions/workflows/build-and-test.yml)
+[![ros - humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/index.html)
+[![ros - jazzy](https://img.shields.io/badge/ROS2-Jazzy-blue)](https://docs.ros.org/en/jazzy/index.html)
+
 This package offers a lightweight and efficient Cartesian motion planning
 library for ROS. It uses inverse-Jacobian methods to track piecewise-linear
 trajectories.
@@ -12,7 +17,7 @@ simulate the output trajectory before running on hardware.
 
 The `CartesianPlanningServer` provides access to the base `CartesianPlanner`
 through a [ROS service](https://wiki.ros.org/Services) that receives a planning
-request and returns the calculated joint trajectory.  See the
+request and returns the calculated joint trajectory. See the
 `cartsian_planning_examples` class for reference on how to setup and interface
 the planning server.
 
