@@ -34,6 +34,9 @@ The server requires the following ROS parameters to be loaded.
 | `end_effector_link`   | `string` |               | Name of the end-effector link.                    |
 | `joints`              | `list`   |               | Ordered joint names of the robot.                 |
 
+The full list of parameters can be found in
+[`cartesian_planning_server_parameters.yaml`](./cartesian_planning_server/src/cartesian_planning_server_parameters.yaml).
+
 ## Running the Demos
 
 Launch the demo robot system as follows

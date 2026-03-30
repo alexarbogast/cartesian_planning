@@ -1,0 +1,53 @@
+cartesian_planning_server:
+  position_threshold: {
+    type: double,
+    default_value: 0.0005,
+    description: "Position convergence threshold in meters",
+  }
+  rotation_threshold: {
+    type: double,
+    default_value: 0.01,
+    description: "Rotation convergence threshold in radians",
+  }
+  max_sampling_step: {
+    type: double,
+    default_value: 0.05,
+    description: "Maximum sampling step size in seconds",
+  }
+  max_step_iterations: {
+    type: int,
+    default_value: 200,
+    description: "Maximum number of iterations per step",
+  }
+  damping: {
+    type: double,
+    default_value: 0.0,
+    description: "Damping factor for IK solver",
+  }
+  robot_base_link: {
+    type: string,
+    description: "Base link of the kinematic chain",
+    read_only: true
+  }
+  end_effector_link: {
+    type: string,
+    description: "End effector link of the kinematic chain",
+    read_only: true
+  }
+  joints: {
+    type: string_array,
+    description: "Ordered list of joint names",
+    validation: {
+      not_empty<>: []
+    },
+    read_only: true
+  }
+  robot_description: {
+    type: string,
+    default_value: "",
+    description: "URDF robot description string",
+    validation: {
+      not_empty<>: []
+    },
+    read_only: true
+  }
